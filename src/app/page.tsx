@@ -1,101 +1,105 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
+import SelectInput from "./components/Select";
+import axios from "axios";
+import { Currency } from "./types/currency";
+import NumInput from "./components/NumInput";
+import DisplayResult from "./components/Result";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [currencies, setCurrencies] = useState<Currency[]>([]);
+  const [baseCurrency, setBaseCurrency] = useState<string | null>(null);
+  const [targetCurrency, setTargetCurrency] = useState<string | null>(null);
+  const [valueToConvert, setValueToConvert] = useState<number | null>(null);
+  const [result, setResult] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  useEffect(() => {
+    const fetchCurrencies = async () => {
+      try {
+        const res = await axios.get(
+          "https://api.freecurrencyapi.com/v1/currencies?apikey=fca_live_9uYEIefjlyBVRvLVh26J0Z2UlcKRJWe7fMDueph3"
+        );
+        setCurrencies(Object.values(res.data.data));
+      } catch (error) {
+        console.error("Error fetching currencies:", error);
+      }
+    };
+
+    fetchCurrencies();
+  }, []);
+
+  useEffect(() => {
+    console.log("Updated Currencies:", currencies);
+  }, [currencies]);
+
+  const convertAmount = async () => {
+    try {
+      setIsLoading(true);
+      const res = await axios.get(
+        `https://api.freecurrencyapi.com/v1/latest?apikey=fca_live_9uYEIefjlyBVRvLVh26J0Z2UlcKRJWe7fMDueph3&base_currency=${baseCurrency}&currencies=${targetCurrency}`
+      );
+      const rate = res.data.data[targetCurrency??""];
+      // setResult(valueToConvert ? valueToConvert * rate : null);
+      setResult(rate ? valueToConvert ? valueToConvert * rate : null : null);
+      console.log(result);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error converting amount:", error);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3 items-center justify-center h-screen w-full">
+      <h1 className="font-bold text-xl dark:text-white text-dark">
+        Currency Converter
+      </h1>
+      <form
+        className="flex flex-col gap-3 items-center justify-center"
+        onSubmit={(e) => {
+          e.preventDefault();
+          convertAmount();
+        }}
+      >
+        <div className="flex sm:flex-row flex-col gap-2">
+          <div className="flex flex-col gap-2">
+            <SelectInput
+              selected={baseCurrency}
+              setSelected={setBaseCurrency}
+              options={currencies}
+              label="Base Currency:"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <NumInput
+              inputValue={valueToConvert}
+              setInputValue={setValueToConvert}
+              placeholder="Enter amount to convert"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <SelectInput
+              selected={targetCurrency}
+              setSelected={setTargetCurrency}
+              options={currencies}
+              label="Target Currency:"
+            />
+            <DisplayResult result={result} />
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <div className="flex items-center justify-center w-full">
+          <button type="submit" className="btn btn-info w-auto">
+            {
+              isLoading ? "Converting..." : "Convert"
+            }
+          </button>
+        </div>
+      </form>
+      {/* <div className="flex flex-col items-start justify-start">
+        <label htmlFor="result">Result:</label>
+        <p className="dark:text-white text-dark">1 USD = 0.85 EUR</p>
+        <p className="dark:text-white text-dark">1 USD = 0.73 GBP</p>
+      </div> */}
     </div>
   );
 }
