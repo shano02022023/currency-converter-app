@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, } from "react";
 import SelectInput from "./components/Select";
 import axios from "axios";
 import { Currency } from "./types/currency";
@@ -19,9 +19,11 @@ export default function Home() {
     const fetchCurrencies = async () => {
       try {
         const res = await axios.get(
-          "https://api.freecurrencyapi.com/v1/currencies?apikey=fca_live_9uYEIefjlyBVRvLVh26J0Z2UlcKRJWe7fMDueph3"
+          `https://api.freecurrencyapi.com/v1/currencies?apikey=${process.env.NEXT_PUBLIC_CURRENCY_API_KEY}`
         );
         setCurrencies(Object.values(res.data.data));
+
+        // console.log("Currencies:", res.data.data);
       } catch (error) {
         console.error("Error fetching currencies:", error);
       }
@@ -30,15 +32,11 @@ export default function Home() {
     fetchCurrencies();
   }, []);
 
-  useEffect(() => {
-    console.log("Updated Currencies:", currencies);
-  }, [currencies]);
-
   const convertAmount = async () => {
     try {
       setIsLoading(true);
       const res = await axios.get(
-        `https://api.freecurrencyapi.com/v1/latest?apikey=fca_live_9uYEIefjlyBVRvLVh26J0Z2UlcKRJWe7fMDueph3&base_currency=${baseCurrency}&currencies=${targetCurrency}`
+        `https://api.freecurrencyapi.com/v1/latest?apikey=${process.env.NEXT_PUBLIC_CURRENCY_API_KEY}&base_currency=${baseCurrency}&currencies=${targetCurrency}`
       );
       const rate = res.data.data[targetCurrency??""];
       // setResult(valueToConvert ? valueToConvert * rate : null);
