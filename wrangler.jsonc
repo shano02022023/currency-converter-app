@@ -17,6 +17,9 @@
   },
   "observability": {
     "enabled": true
+  },
+  "vars": {
+    "NEXT_PUBLIC_CURRENCY_API_KEY": "fca_live_9uYEIefjlyBVRvLVh26J0Z2UlcKRJWe7fMDueph3"
   }
   /**
    * Smart Placement
