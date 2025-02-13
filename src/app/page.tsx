@@ -6,6 +6,7 @@ import axios from "axios";
 import { Currency } from "./types/currency";
 import NumInput from "./components/NumInput";
 import DisplayResult from "./components/Result";
+import Graph from "./components/Graph";
 
 export default function Home() {
   const [currencies, setCurrencies] = useState<Currency[]>([]);
@@ -23,6 +24,8 @@ export default function Home() {
   const [commaSeperatedCurrencies, setCommaSeperateCurrencies] = useState<
     string | null
   >(null);
+  const [historicalRatesData, setHistoricalRatesData] = useState<number[]>([]);
+  const [isGraphLoading, setIsGraphLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchCurrencies = async () => {
@@ -42,7 +45,7 @@ export default function Home() {
           ...currenciesObject[key],
         }));
 
-        console.log(currenciesArray);
+        // console.log(currenciesArray);
 
         const codes = currenciesArray
           .slice(0, 3)
@@ -51,7 +54,7 @@ export default function Home() {
 
         setCommaSeperateCurrencies(codes);
 
-        console.log("Currencies:", commaSeperatedCurrencies);
+        // console.log("Currencies:", commaSeperatedCurrencies);
 
         // console.log("Currencies:", res.data.data);
       } catch (error) {
@@ -65,16 +68,40 @@ export default function Home() {
   useEffect(() => {
     const fetchHistoricalRates = async () => {
       try {
-        if(commaSeperatedCurrencies === null) return;
+        if (commaSeperatedCurrencies === null) return;
 
-        const res = await axios.get(
-          `https://api.freecurrencyapi.com/v1/historical?apikey=${process.env.NEXT_PUBLIC_CURRENCY_API_KEY}&date=${filterDate}&base_currency=${filterCurrency}`
+        setIsGraphLoading(true);
+
+        let endpoint = ``;
+
+        if (filterDate == "") {
+          endpoint = `https://api.freecurrencyapi.com/v1/historical?apikey=${
+            process.env.NEXT_PUBLIC_CURRENCY_API_KEY
+          }&date=${
+            new Date(new Date().setDate(new Date().getDate() - 1))
+              .toISOString()
+              .split("T")[0]
+          }&base_currency=${filterCurrency}`;
+        } else {
+          endpoint = `https://api.freecurrencyapi.com/v1/historical?apikey=${process.env.NEXT_PUBLIC_CURRENCY_API_KEY}&date=${filterDate}&base_currency=${filterCurrency}`;
+        }
+        const res = await axios.get(endpoint);
+
+        setHistoricalRatesData(
+          res.data.data[
+            filterDate ??
+              new Date(new Date().setDate(new Date().getDate() - 1))
+                .toISOString()
+                .split("T")[0]
+          ]
         );
-        console.log(res.data);
+        setIsGraphLoading(false);
+        // console.log(res.data.data);
       } catch (error) {
         console.error("Error fetching historical rates:", error);
       }
     };
+
     fetchHistoricalRates();
   }, [filterCurrency, filterDate, commaSeperatedCurrencies]);
 
@@ -87,7 +114,7 @@ export default function Home() {
       const rate = res.data.data[targetCurrency ?? ""];
       // setResult(valueToConvert ? valueToConvert * rate : null);
       setResult(rate ? (valueToConvert ? valueToConvert * rate : null) : null);
-      console.log(result);
+      // console.log(result);
       setIsLoading(false);
     } catch (error) {
       console.error("Error converting amount:", error);
@@ -101,7 +128,9 @@ export default function Home() {
       </h1>
       <div className="flex sm:flex-row flex-col items-between justify-between gap-10">
         <div className="w-full">
-          <h1>Historical Exchange Rates</h1>
+          <h1 className="font-bold text-xl dark:text-white text-dark">
+            Historical Exchange Rates
+          </h1>
           <div className="flex lg:flex-row flex-col gap-2">
             <input
               type="date"
@@ -128,8 +157,15 @@ export default function Home() {
               options={currencies}
             />
           </div>
+          {isGraphLoading && (
+            <span className="loading loading-dots loading-md"></span>
+          )}
+          <Graph data={historicalRatesData} />
         </div>
         <div className="w-full">
+          <h1 className="font-bold text-xl dark:text-white text-dark">
+            Convert Currency
+          </h1>
           <form
             className="flex flex-col gap-3 items-center justify-center"
             onSubmit={(e) => {
