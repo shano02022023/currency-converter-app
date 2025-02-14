@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
 
 interface SelectInputProps {
-  label: string;
+  label?: string;
   options: Currency[];
   selected: string | null;
   setSelected: (value: string | null) => void;
@@ -57,9 +57,13 @@ const SelectInput = ({
 
   return (
     <div ref={dropdownRef} className="relative w-full max-w-xs">
-      <label className="block text-sm font-medium dark:text-white text-dark mb-1">
-        {label}
-      </label>
+      {
+        label && (
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+            {label}
+          </label>
+        )
+      }
 
       <div
         className="flex items-center justify-between w-full p-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer"
