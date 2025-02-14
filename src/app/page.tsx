@@ -70,21 +70,24 @@ export default function Home() {
       try {
         if (commaSeperatedCurrencies === null) return;
 
+        if (filterDate == "") return;
+
         setIsGraphLoading(true);
 
         let endpoint = ``;
 
-        if (filterDate == "") {
-          endpoint = `https://api.freecurrencyapi.com/v1/historical?apikey=${
-            process.env.NEXT_PUBLIC_CURRENCY_API_KEY
-          }&date=${
-            new Date(new Date().setDate(new Date().getDate() - 1))
-              .toISOString()
-              .split("T")[0]
-          }&base_currency=${filterCurrency}`;
-        } else {
-          endpoint = `https://api.freecurrencyapi.com/v1/historical?apikey=${process.env.NEXT_PUBLIC_CURRENCY_API_KEY}&date=${filterDate}&base_currency=${filterCurrency}`;
-        }
+        // if (filterDate == "") {
+        //   endpoint = `https://api.freecurrencyapi.com/v1/historical?apikey=${
+        //     process.env.NEXT_PUBLIC_CURRENCY_API_KEY
+        //   }&date=${
+        //     new Date(new Date().setDate(new Date().getDate() - 1))
+        //       .toISOString()
+        //       .split("T")[0]
+        //   }&base_currency=${filterCurrency}`;
+        // } else {
+        // }
+
+        endpoint = `https://api.freecurrencyapi.com/v1/historical?apikey=${process.env.NEXT_PUBLIC_CURRENCY_API_KEY}&date=${filterDate}&base_currency=${filterCurrency}`;
         const res = await axios.get(endpoint);
 
         setHistoricalRatesData(
@@ -131,7 +134,7 @@ export default function Home() {
           <h1 className="font-bold text-xl dark:text-white text-dark">
             Historical Exchange Rates
           </h1>
-          <div className="flex lg:flex-row flex-col gap-2">
+          <div className="flex lg:flex-row flex-col gap-2 mt-2">
             <input
               type="date"
               placeholder="Type here"
@@ -160,7 +163,13 @@ export default function Home() {
           {isGraphLoading && (
             <span className="loading loading-dots loading-md"></span>
           )}
-          <Graph data={historicalRatesData} />
+          {filterDate != "" ? (
+            <Graph data={historicalRatesData} />
+          ) : (
+            <p className="dark:text-white text-dark p-10">
+              Select a date to view historical rates
+            </p>
+          )}
         </div>
         <div className="w-full">
           <h1 className="font-bold text-xl dark:text-white text-dark">

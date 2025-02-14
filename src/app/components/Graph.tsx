@@ -27,7 +27,7 @@ const Graph = ({ data }: GraphProps) => {
               {
                 label: 'Currency Exchange Rate',
                 data: Object.values(data), 
-                backgroundColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgba(173, 216, 230, 1)',
                 borderColor: 'rgba(255, 99, 132, 0.2)',
               },
             ],
