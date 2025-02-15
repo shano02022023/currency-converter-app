@@ -8,6 +8,7 @@ interface SelectInputProps {
   options: Currency[];
   selected: string | null;
   setSelected: (value: string | null) => void;
+  errorMessage?: string;
 }
 
 const SelectInput = ({
@@ -15,6 +16,7 @@ const SelectInput = ({
   label,
   selected,
   setSelected,
+  errorMessage
 }: SelectInputProps) => {
   const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [isCollapsed, setIsCollapsed] = useState<boolean>(true);
@@ -116,8 +118,14 @@ const SelectInput = ({
               </li>
             )}
           </ul>
+          
         </div>
       )}
+      {
+        errorMessage && (
+          <span className="text-red-600">{errorMessage}</span>
+        )
+      }
     </div>
   );
 };
