@@ -21,7 +21,7 @@ const NumInput = ({
 
       <input
         type="number"
-        step={0.01}
+        step={1}
         placeholder={placeholder}
         className="input input-bordered w-full max-w-xs"
         disabled={isDisabled}

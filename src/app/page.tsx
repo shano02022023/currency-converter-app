@@ -26,6 +26,10 @@ export default function Home() {
   >(null);
   const [historicalRatesData, setHistoricalRatesData] = useState<number[]>([]);
   const [isGraphLoading, setIsGraphLoading] = useState<boolean>(false);
+  const [baseCurrencyErrorMessage, setBaseCurrencyErrorMessage] =
+    useState<string>("");
+  const [targetCurrencyErrorMessage, setTargetCurrencyErrorMessage] =
+    useState<string>("");
 
   useEffect(() => {
     const fetchCurrencies = async () => {
@@ -110,13 +114,43 @@ export default function Home() {
 
   const convertAmount = async () => {
     try {
+      if (!baseCurrency && !targetCurrency) {
+        setBaseCurrencyErrorMessage("Please select a base currency");
+        setTargetCurrencyErrorMessage("Please select a target currency");
+        return;
+      } else {
+        setBaseCurrencyErrorMessage("");
+        setTargetCurrencyErrorMessage("");
+      }
+
+      if (!baseCurrency) {
+        setBaseCurrencyErrorMessage("Please select a base currency");
+        return;
+      } else {
+        setBaseCurrencyErrorMessage("");
+      }
+
+      if (!targetCurrency) {
+        setTargetCurrencyErrorMessage("Please select a target currency");
+        return;
+      } else {
+        setTargetCurrencyErrorMessage("");
+      }
+
       setIsLoading(true);
       const res = await axios.get(
         `https://api.freecurrencyapi.com/v1/latest?apikey=${process.env.NEXT_PUBLIC_CURRENCY_API_KEY}&base_currency=${baseCurrency}&currencies=${targetCurrency}`
       );
       const rate = res.data.data[targetCurrency ?? ""];
       // setResult(valueToConvert ? valueToConvert * rate : null);
-      setResult(rate ? (valueToConvert ? valueToConvert * rate : null) : null);
+      setResult(
+        rate
+          ? valueToConvert
+            ? parseFloat((valueToConvert * rate).toFixed(2))
+            : null
+          : null
+      );
+
       // console.log(result);
       setIsLoading(false);
     } catch (error) {
@@ -188,6 +222,7 @@ export default function Home() {
                   selected={baseCurrency}
                   setSelected={setBaseCurrency}
                   options={currencies}
+                  errorMessage={baseCurrencyErrorMessage}
                   label="Base Currency:"
                 />
                 <NumInput
@@ -202,6 +237,7 @@ export default function Home() {
                   selected={targetCurrency}
                   setSelected={setTargetCurrency}
                   options={currencies}
+                  errorMessage={targetCurrencyErrorMessage}
                   label="Target Currency:"
                 />
                 <DisplayResult result={result} />
