@@ -114,7 +114,15 @@ export default function Home() {
 
   const convertAmount = async () => {
     try {
-      
+      if (!baseCurrency && !targetCurrency) {
+        setBaseCurrencyErrorMessage("Please select a base currency");
+        setTargetCurrencyErrorMessage("Please select a target currency");
+        return;
+      } else {
+        setBaseCurrencyErrorMessage("");
+        setTargetCurrencyErrorMessage("");
+      }
+
       if (!baseCurrency) {
         setBaseCurrencyErrorMessage("Please select a base currency");
         return;
